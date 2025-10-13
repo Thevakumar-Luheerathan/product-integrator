@@ -23,3 +23,8 @@ test/test-results
 # Quilt's internal data.
 /.pc
 /patches/*.diff~
+installers/mac/WSO2_Integrator.pkg
+installers/mac/artifacts-darwin.zip
+installers/mac/ballerina-home.zip
+installers/mac/WSO2 Integrator.pkg
+installers/mac/WSO2 Integrator.pkg

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Get the user who invoked the installer
+CURRENT_USER="${USER}"
+if [ -z "$CURRENT_USER" ]; then
+    CURRENT_USER="$(whoami)"
+fi
+``
+USER_HOME=$(eval echo ~$CURRENT_USER)
+USER_HOME_TEMP="$USER_HOME/private/tmp"
+USER_APPS="$USER_HOME/Applications"
+USER_BALLERINA_HOME="$USER_HOME/.ballerina"
+
+# Create user Applications directory if it doesn't exist
+mkdir -p "$USER_APPS"
+mkdir -p "$USER_BALLERINA_HOME"
+
+# Copy the app to user's Applications folder
+if [ -d "$USER_HOME_TEMP" ]; then
+    echo "Installing to $USER_APPS..."
+    cp -R "$USER_HOME_TEMP/Applications/WSO2 Integrator.app" "$USER_APPS/"
+    chown -R "$CURRENT_USER" "$USER_APPS/WSO2 Integrator.app"
+    xattr -r -d com.apple.quarantine "$USER_APPS/WSO2 Integrator.app"
+
+    # Copy the ballerina-home directory
+    cp -R "$USER_HOME_TEMP/ballerina-home" "$USER_BALLERINA_HOME/"
+    chown -R "$CURRENT_USER" "$USER_BALLERINA_HOME/"
+    chmod -R 755 "$USER_BALLERINA_HOME/ballerina-home/bin/"*
+
+    # Clean up temp directory
+    rm -rf "$USER_HOME_TEMP"
+    
+    echo "Installation completed successfully!"
+else
+    echo "Error: Application not found in temporary location"
+    exit 1
+fi
+
+exit 0
