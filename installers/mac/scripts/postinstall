@@ -1,63 +1,103 @@
 #!/bin/bash
 
-# Get the user who invoked the installer
-CURRENT_USER="${USER}"
-if [ -z "$CURRENT_USER" ]; then
-    CURRENT_USER="$(whoami)"
-fi
+# postinstall script for WSO2 Integrator
+# This script runs after the package installation
 
-USER_HOME=$(eval echo ~$CURRENT_USER)
-USER_HOME_TEMP="$USER_HOME/private/tmp"
-USER_APPS="$USER_HOME/Applications"
-USER_APP_SUPPORT_DIR="$USER_HOME/Library/Application Support/WSO2 Integrator"
-USER_APP_SETTINGS="$USER_APP_SUPPORT_DIR/User/settings.json"
+set -e
 
-# Create user Applications directory if it doesn't exist
-mkdir -p "$USER_APPS"
-mkdir -p "$USER_APP_SUPPORT_DIR"
+SETTINGS_SOURCE="/Library/Application Support/WSO2-Integrator/User/settings.json"
 
-# Copy the app to user's Applications folder
-if [ -d "$USER_HOME_TEMP" ]; then
-    echo "Installing to $USER_APPS..."
-    cp -R "$USER_HOME_TEMP/Applications/WSO2 Integrator.app" "$USER_APPS/"
-    chown -R "$CURRENT_USER" "$USER_APPS/WSO2 Integrator.app"
-    xattr -r -d com.apple.quarantine "$USER_APPS/WSO2 Integrator.app"
+echo "Starting WSO2 Integrator post-installation..."
 
-    # Copy the ballerina-home directory
-    chmod -R 755 "$USER_HOME_TEMP/ballerina-home/bin/"*
-    chmod -R 755 "$USER_HOME_TEMP/ballerina-home/scripts/"* #TODO: Need to check why bin has permissions but scripts don't
-    cp -R "$USER_HOME_TEMP/ballerina-home" "$USER_APP_SUPPORT_DIR/"
-    chown -R "$CURRENT_USER" "$USER_APP_SUPPORT_DIR/"
-    # chmod -R 755 "$USER_APP_SUPPORT_DIR/ballerina-home/bin/"*
-    # chmod -R 755 "$USER_APP_SUPPORT_DIR/ballerina-home/scripts/"* 
+echo "Post-install script started"
 
-    # Clean up temp directory
-    rm -rf "$USER_HOME_TEMP"
-    
-    echo "Installation completed successfully!"
-else
-    echo "Error: Application not found in temporary location"
+# Verify source settings file exists
+if [ ! -f "$SETTINGS_SOURCE" ]; then
+    echo "ERROR: Source settings.json not found at $SETTINGS_SOURCE"
     exit 1
 fi
 
-    cat "$USER_APP_SETTINGS"
+echo "Source settings.json found"
 
-    # Update settings.json with ballerina.home and ballerina.pluginDevMode using standard tools
-    if [ -f "$USER_APP_SETTINGS" ]; then
-        tmpfile=$(mktemp)
-        # Remove last closing brace, add new keys, and close again
-        sed '$d' "$USER_APP_SETTINGS" > "$tmpfile"
-        echo "  ,\"ballerina.home\": \"$USER_APP_SUPPORT_DIR/ballerina-home\",\n  \"ballerina.pluginDevMode\": true\n}" >> "$tmpfile"
-        mv "$tmpfile" "$USER_APP_SETTINGS"
+# Get all user home directories (excluding system users)
+USER_HOMES=$(dscl . list /Users NFSHomeDirectory | awk '$2 ~ /^\/Users\// {print $2}')
+
+# Copy settings.json to each user's directory
+for USER_HOME in $USER_HOMES; do
+    # Skip if home directory doesn't exist
+    if [ ! -d "$USER_HOME" ]; then
+        echo "Skipping non-existent home: $USER_HOME"
+        continue
+    fi
+    
+    # Get the username
+    USERNAME=$(basename "$USER_HOME")
+    
+    # Skip system users
+    if [ "$USERNAME" = "Shared" ] || [ "$USERNAME" = "Guest" ]; then
+        echo "Skipping system user: $USERNAME"
+        continue
+    fi
+    
+    USER_SETTINGS_DIR="$USER_HOME/Library/Application Support/WSO2 Integrator/User"
+    USER_SETTINGS_FILE="$USER_SETTINGS_DIR/settings.json"
+    
+    echo "Processing user: $USERNAME"
+    
+    # Create directory if it doesn't exist
+    if [ ! -d "$USER_SETTINGS_DIR" ]; then
+        mkdir -p "$USER_SETTINGS_DIR"
+        echo "Created directory: $USER_SETTINGS_DIR"
+    fi
+    
+    # Copy settings file
+    cp "$SETTINGS_SOURCE" "$USER_SETTINGS_FILE"
+    
+    # Get the user's UID and GID
+    USER_UID=$(id -u "$USERNAME" 2>/dev/null || echo "")
+    USER_GID=$(id -g "$USERNAME" 2>/dev/null || echo "")
+    
+    if [ -n "$USER_UID" ] && [ -n "$USER_GID" ]; then
+        # Set proper ownership
+        chown -R "$USER_UID:$USER_GID" "$USER_HOME/Library/Application Support/WSO2 Integrator"
+        echo "Set ownership for $USERNAME (UID: $USER_UID, GID: $USER_GID)"
     else
-        echo "settings.json not found, creating a new one at $USER_APP_SETTINGS"
-        mkdir -p "$(dirname "$USER_APP_SETTINGS")"
-        cat > "$USER_APP_SETTINGS" <<EOF
-{
-    "ballerina.home": "$USER_APP_SUPPORT_DIR/ballerina-home",
-    "ballerina.pluginDevMode": true
-}
-EOF
+        echo "WARNING: Could not determine UID/GID for $USERNAME"
+    fi
+    
+    # Set proper permissions
+    chmod 755 "$USER_SETTINGS_DIR"
+    chmod 644 "$USER_SETTINGS_FILE"
+    
+    echo "Successfully copied settings.json to $USER_SETTINGS_FILE"
+done
+
+# Set proper permissions for system-wide directories
+echo "Setting system-wide permissions"
+
+# Set permissions for /Library/WSO2-Integrator/Ballerina
+if [ -d "/Library/WSO2-Integrator/Ballerina" ]; then
+    chmod -R 755 "/Library/WSO2-Integrator/Ballerina"
+    chown -R root:wheel "/Library/WSO2-Integrator/Ballerina"
+    echo "Set permissions for Ballerina directory"
 fi
+
+# Set permissions for system settings
+if [ -d "/Library/Application Support/WSO2 Integrator" ]; then
+    chmod -R 755 "/Library/Application Support/WSO2 Integrator"
+    chown -R root:wheel "/Library/Application Support/WSO2 Integrator"
+    echo "Set permissions for system settings directory"
+fi
+
+# Set permissions for the .app in /Applications
+if [ -d "/Applications/WSO2 Integrator.app" ]; then
+    chmod -R 755 "/Applications/WSO2 Integrator.app"
+    chown -R root:wheel "/Applications/WSO2 Integrator.app"
+    echo "Set permissions for application"
+fi
+
+echo "Post-install script completed successfully"
+
+echo "WSO2 Integrator installation completed successfully!"
 
 exit 0

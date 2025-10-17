@@ -34,15 +34,19 @@ WSO2_ZIP="$2"
 VERSION="$3"
 
 OUTPUT_PKG="WSO2 Integrator.pkg"
-BUNDLE_IDENTIFIER="org.wso2.integrator"
+BUNDLE_IDENTIFIER="com.wso2.integrator"
 EXTRACTION_TARGET="$WORK_DIR/payload"
+
 # Extract ballerina zip
-BALLERINA_TARGET="$WORK_DIR/payload/ballerina-home"
+BALLERINA_TARGET="$WORK_DIR/payload/Library/WSO2-Integrator/Ballerina"
 rm -rf "$BALLERINA_TARGET"
+mkdir -p "$BALLERINA_TARGET"
 unzip -o "$BALLERINA_ZIP" -d "$EXTRACTION_TARGET"
 BALLERINA_UNZIPPED_FOLDER=$(unzip -Z1 "$BALLERINA_ZIP" | head -1 | cut -d/ -f1)
 BALLERINA_UNZIPPED_PATH="$EXTRACTION_TARGET/$BALLERINA_UNZIPPED_FOLDER"
-mv "$BALLERINA_UNZIPPED_PATH" "$BALLERINA_TARGET"
+mv "$BALLERINA_UNZIPPED_PATH"/* "$BALLERINA_TARGET"
+rm -rf "$BALLERINA_UNZIPPED_PATH"
+chmod +x "$BALLERINA_TARGET/bin/"
 
 # Extract wso2 zip
 WSO2_TARGET="$WORK_DIR/payload/Applications"
@@ -51,7 +55,9 @@ unzip -o "$WSO2_ZIP" -d "$EXTRACTION_TARGET"
 WSO2_UNZIPPED_FOLDER=$(unzip -Z1 "$WSO2_ZIP" | head -1 | cut -d/ -f1)
 WSO2_UNZIPPED_PATH="$EXTRACTION_TARGET/$WSO2_UNZIPPED_FOLDER"
 mv "$WSO2_UNZIPPED_PATH" "$WSO2_TARGET"
+rm -rf "$WSO2_UNZIPPED_PATH"
 chmod +x "$WSO2_TARGET/WSO2 Integrator.app"/*
+xattr -cr "$WSO2_TARGET/WSO2 Integrator.app"
 
 rm -rf "$EXTRACTION_TARGET/__MACOSX"
 
@@ -68,7 +74,7 @@ pkgbuild --root "$EXTRACTION_TARGET" \
          --scripts "$WORK_DIR/scripts" \
          --identifier "$BUNDLE_IDENTIFIER" \
          --version "$VERSION" \
-         --install-location "/tmp" \
+         --install-location "/" \
          "$WORK_DIR/WSO2 Integrator.pkg"
          
 
@@ -88,7 +94,7 @@ else
     exit 1
 fi
 
-rm -rf "$BALLERINA_TARGET/*"
-rm -rf "$WSO2_TARGET/*"
+rm -rf "$BALLERINA_TARGET"/*
+rm -rf "$WSO2_TARGET"/*
 
-print_info "Done!"
+# print_info "Done!"
