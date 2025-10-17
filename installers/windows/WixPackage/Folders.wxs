@@ -1,0 +1,20 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <StandardDirectory Id="ProgramFiles6432Folder">
+	  <Directory Id="ORGFOLDER" Name="!(bind.Property.Manufacturer)">
+		<Directory Id="INSTALLFOLDER" Name="!(bind.Property.ProductName)" />
+	  </Directory>
+    </StandardDirectory>
+
+	<!-- <StandardDirectory Id="LocalAppDataFolder">
+		<Directory Id="INSTALLFOLDERUSER" Name="!(bind.Property.ProductName)" />
+	</StandardDirectory> -->
+
+	<StandardDirectory Id="CommonAppDataFolder">
+		<Directory Id="BALLERINATEMPDIR" Name="WSO2-Integrator"/>
+	</StandardDirectory>
+	<StandardDirectory Id="ProgramMenuFolder" />
+	<StandardDirectory Id="DesktopFolder" />
+	  
+  </Fragment>
+</Wix>

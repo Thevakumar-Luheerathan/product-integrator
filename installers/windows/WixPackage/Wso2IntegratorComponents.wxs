@@ -1,0 +1,10 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Fragment>
+    <ComponentGroup Id="Wso2IntegratorComponents" Directory="INSTALLFOLDER">
+		<Files Include=".\payload\Ballerina\bin\bal.bat" />
+	  <!-- <Component>
+			<File Source=".\app\Code.exe" />
+	  </Component> -->
+    </ComponentGroup>
+  </Fragment>
+</Wix>
