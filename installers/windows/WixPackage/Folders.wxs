@@ -11,7 +11,7 @@
 	</StandardDirectory> -->
 
 	<StandardDirectory Id="CommonAppDataFolder">
-		<Directory Id="BALLERINATEMPDIR" Name="WSO2-Integrator"/>
+		<Directory Id="BALLERINASETTINGSDIR" Name="WSO2-Integrator"/>
 	</StandardDirectory>
 	<StandardDirectory Id="ProgramMenuFolder" />
 	<StandardDirectory Id="DesktopFolder" />

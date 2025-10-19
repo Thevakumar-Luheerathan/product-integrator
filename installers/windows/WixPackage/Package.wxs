@@ -7,7 +7,7 @@
     UpgradeCode="344b046a-fa6a-4452-be40-2794f59fe7b0"
   >
     <Binary Id="ExtActionsDll" SourceFile="..\CustomAction1\bin\Debug\net472\CustomAction1.CA.dll" />
-    <CustomAction Id="copySettingsFileToUserhomeCA" BinaryRef="ExtActionsDll" DllEntry="copySettingsFileToUserhome"/>
+    <CustomAction Id="copySettingsFileToUserhomeCA" BinaryRef="ExtActionsDll" DllEntry="copySettingsFileToUserhome" Execute="deferred" Impersonate="no" Return="check"/>
     <InstallExecuteSequence>
       <Custom Action="copySettingsFileToUserhomeCA" After="InstallFiles"/>
     </InstallExecuteSequence>

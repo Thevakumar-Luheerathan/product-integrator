@@ -22741,3 +22741,7 @@ installers/windows/WixPackage/payload/Integrator/resources/app/licenses/LICENSE-
 installers/windows/WixPackage/payload/Integrator/resources/app/licenses/LICENSE-ptb.rtf
 installers/windows/WixPackage/payload/Integrator/resources/app/licenses/LICENSE-rus.rtf
 installers/windows/WixPackage/payload/Integrator/resources/app/licenses/LICENSE-trk.rtf
+installers/windows/CustomAction1/obj/
+installers/windows/CustomAction1/bin/
+installers/windows/WixPackage/obj/
+installers/windows/WixPackage/bin/

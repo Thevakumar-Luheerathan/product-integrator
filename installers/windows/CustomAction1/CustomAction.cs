@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.AccountManagement;
 using System.Linq;
+using System.Management;
 using WixToolset.Dtf.WindowsInstaller;
 
 namespace CustomAction1
@@ -14,35 +16,52 @@ namespace CustomAction1
 
             try
             {
-                string usersRoot = @"C:\\Users";
-                string sourceFile = @"C:\\ProgramData\\WSO2-Integrator\\settings.json";
+                string sourceFile = @"C:\ProgramData\WSO2-Integrator\settings.json";
                 if (!System.IO.File.Exists(sourceFile))
                 {
                     session.Log($"Source settings.json not found: {sourceFile}");
-                    return ActionResult.Failure;
+                    //return ActionResult.Failure;
                 }
 
-                var userDirs = System.IO.Directory.GetDirectories(usersRoot);
-                foreach (var userDir in userDirs)
+                var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_UserProfile WHERE Special = False");
+
+                using (PrincipalContext context = new PrincipalContext(ContextType.Machine))
                 {
-                    string appDataRoaming = System.IO.Path.Combine(userDir, "AppData", "Roaming");
-                    if (System.IO.Directory.Exists(appDataRoaming))
+                    foreach (ManagementObject profile in searcher.Get())
                     {
-                        string targetDir = System.IO.Path.Combine(appDataRoaming, "WSO2-Integrator", "User");
-                        if (!System.IO.Directory.Exists(targetDir))
+                        string localPath = (string)profile["LocalPath"];
+                        if (string.IsNullOrEmpty(localPath)) continue;
+
+                        string username = localPath.Substring(localPath.LastIndexOf('\\') + 1);
+                        var user = UserPrincipal.FindByIdentity(context, username);
+
+                        if (user == null || user.Enabled == false)
                         {
-                            System.IO.Directory.CreateDirectory(targetDir);
+                            continue;
                         }
-                        string targetFile = System.IO.Path.Combine(targetDir, "settings.json");
-                        System.IO.File.Copy(sourceFile, targetFile, true);
-                        session.Log($"Copied settings.json to: {targetFile}");
+
+                        session.Log($"User directory: {localPath}");
+                        string appDataRoaming = System.IO.Path.Combine(localPath, "AppData", "Roaming");
+                        if (System.IO.Directory.Exists(appDataRoaming))
+                        {
+                            session.Log($"AppData\\Roaming directory found: {appDataRoaming}");
+                            string targetDir = System.IO.Path.Combine(appDataRoaming, "WSO2-Integrator", "User");
+                            if (!System.IO.Directory.Exists(targetDir))
+                            {
+                                System.IO.Directory.CreateDirectory(targetDir);
+                            }
+                            string targetFile = System.IO.Path.Combine(targetDir, "settings.json");
+                            session.Log($"Copying settings.json to: {targetFile}");
+                            System.IO.File.Copy(sourceFile, targetFile, true);
+                            session.Log($"Copied settings.json to: {targetFile}");
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
                 session.Log($"Error copying settings.json: {ex}");
-                return ActionResult.Failure;
+                //return ActionResult.Failure;
             }
 
             return ActionResult.Success;
