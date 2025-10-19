@@ -5,9 +5,11 @@
       <Exclude Files=".\payload\settings.json"/>
       <Exclude Files=".\payload\Integrator\Code.exe"/>  <!-- TODO: Need to change it to WSO2-Integrator.exe -->
     </Files>
-	  <Component>
-			<File Source=".\payload\Integrator\Code.exe" /> <!-- TODO: Need to change it to WSO2-Integrator.exe -->
-	  </Component>
+  <Component Id="Wso2IntegratorExe" Guid="*">
+      <File Source=".\payload\Integrator\WSO2-Integrator.exe" />
+      <Shortcut Id="Wso2IntegratorDesktopShortcut" Directory="DesktopFolder" Name="WSO2 Integrator" WorkingDirectory="INSTALLFOLDER" Icon="WSO2IntegratorIcon.ico" Advertise="no" />
+      <Shortcut Id="Wso2IntegratorStartMenuShortcut" Directory="ProgramMenuFolder" Name="WSO2 Integrator" WorkingDirectory="INSTALLFOLDER" Icon="WSO2IntegratorIcon.ico" Advertise="no" />
+  </Component>
     </ComponentGroup>
   </Fragment>
 </Wix>
