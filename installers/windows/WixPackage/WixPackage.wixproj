@@ -1,6 +1,7 @@
 ﻿<Project Sdk="WixToolset.Sdk/5.0.2">
 <PropertyGroup>
 <Platform>x64</Platform>
+<OutputName>WSO2-Integrator</OutputName>
 </PropertyGroup>
 
   <ItemGroup>
