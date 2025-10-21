@@ -1,0 +1,8 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+  xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Fragment>
+    <ComponentGroup Id="BallerinaComponents" Directory="BALLERINAFOLDER">
+      <Files Include=".\payload\Ballerina\**"/>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

@@ -16,7 +16,7 @@ namespace CustomAction1
 
             try
             {
-                string sourceFile = @"C:\ProgramData\WSO2-Integrator\settings.json";
+                string sourceFile = @"C:\ProgramData\WSO2 Integrator\settings.json";
                 if (!System.IO.File.Exists(sourceFile))
                 {
                     session.Log($"Source settings.json not found: {sourceFile}");
@@ -45,7 +45,7 @@ namespace CustomAction1
                         if (System.IO.Directory.Exists(appDataRoaming))
                         {
                             session.Log($"AppData\\Roaming directory found: {appDataRoaming}");
-                            string targetDir = System.IO.Path.Combine(appDataRoaming, "WSO2-Integrator", "User");
+                            string targetDir = System.IO.Path.Combine(appDataRoaming, "WSO2 Integrator", "User");
                             if (!System.IO.Directory.Exists(targetDir))
                             {
                                 System.IO.Directory.CreateDirectory(targetDir);
