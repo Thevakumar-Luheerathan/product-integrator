@@ -5,7 +5,7 @@
 
 set -e
 
-SETTINGS_SOURCE="/Library/Application Support/WSO2-Integrator/User/settings.json"
+SETTINGS_SOURCE="/Library/Application Support/WSO2 Integrator/User/settings.json"
 
 echo "Starting WSO2 Integrator post-installation..."
 
