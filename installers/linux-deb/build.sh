@@ -33,23 +33,33 @@ BALLERINA_ZIP="$1"
 WSO2_ZIP="$2"
 OUTPUT_DEB="$3"
 
-EXTRACTION_TARGET="$WORK_DIR/package/usr/share"
+EXTRACTION_TARGET="$WORK_DIR/package/usr/share/WSO2-Integrator"
 # Extract ballerina zip
-BALLERINA_TARGET="$WORK_DIR/package/usr/share/ballerina-home"
+BALLERINA_TARGET="$WORK_DIR/package/usr/share/WSO2-Integrator/Ballerina"
 rm -rf "$BALLERINA_TARGET"
+mkdir -p "$BALLERINA_TARGET"
 unzip -o "$BALLERINA_ZIP" -d "$EXTRACTION_TARGET"
+BALLERINA_UNZIPPED_FOLDER=$(unzip -Z1 "$BALLERINA_ZIP" | head -1 | cut -d/ -f1)
+BALLERINA_UNZIPPED_PATH="$EXTRACTION_TARGET/$BALLERINA_UNZIPPED_FOLDER"
+mv "$BALLERINA_UNZIPPED_PATH"/* "$BALLERINA_TARGET"
+rm -rf "$BALLERINA_UNZIPPED_PATH"
+chmod +x "$BALLERINA_TARGET/bin/"
 
 # Extract wso2 zip
-WSO2_TARGET="$WORK_DIR/package/usr/share/wso2-integrator"
+WSO2_TARGET="$WORK_DIR/package/usr/share/WSO2-Integrator/Integrator"
 rm -rf "$WSO2_TARGET"
+mkdir -p "$WSO2_TARGET"
 unzip -o "$WSO2_ZIP" -d "$EXTRACTION_TARGET"
+WSO2_UNZIPPED_FOLDER=$(unzip -Z1 "$WSO2_ZIP" | head -1 | cut -d/ -f1)
+WSO2_UNZIPPED_PATH="$EXTRACTION_TARGET/$WSO2_UNZIPPED_FOLDER"
+mv "$WSO2_UNZIPPED_PATH"/* "$WSO2_TARGET"
+rm -rf "$WSO2_UNZIPPED_PATH"
 
 
 
 # Make postinst executable
 chmod 755 "$WORK_DIR/package/DEBIAN/postinst"
 chmod 755 "$WORK_DIR/package/DEBIAN/postrm"
-chmod 755 "$WORK_DIR/package/DEBIAN/prerm"
 
 # Get the original installed size
 INSTALLED_SIZE=$(du -sk "$WORK_DIR/package" | cut -f1)
