@@ -38,7 +38,7 @@ BUNDLE_IDENTIFIER="com.wso2.integrator"
 EXTRACTION_TARGET="$WORK_DIR/payload"
 
 # Extract ballerina zip
-BALLERINA_TARGET="$WORK_DIR/payload/Library/WSO2-Integrator/Ballerina"
+BALLERINA_TARGET="$WORK_DIR/payload/Library/Ballerina"
 rm -rf "$BALLERINA_TARGET"
 mkdir -p "$BALLERINA_TARGET"
 unzip -o "$BALLERINA_ZIP" -d "$EXTRACTION_TARGET"
@@ -97,4 +97,4 @@ fi
 rm -rf "$BALLERINA_TARGET"/*
 rm -rf "$WSO2_TARGET"/*
 
-# print_info "Done!"
+print_info "Done!"

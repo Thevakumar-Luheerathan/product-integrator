@@ -5,89 +5,46 @@
 
 set -e
 
-SETTINGS_SOURCE="/Library/Application Support/WSO2 Integrator/User/settings.json"
-
 echo "Starting WSO2 Integrator post-installation..."
 
 echo "Post-install script started"
 
-# Verify source settings file exists
-if [ ! -f "$SETTINGS_SOURCE" ]; then
-    echo "ERROR: Source settings.json not found at $SETTINGS_SOURCE"
-    exit 1
+echo "Setting system-wide permissions"
+
+# Set permissions for /Library/Ballerina
+if [ -d "/Library/Ballerina" ]; then
+    cd /Library/Ballerina
+    chown -R root:wheel "/Library/Ballerina"
+    chmod -R ugo+r /Library/Ballerina/distributions/ballerina-*
+    chmod -R ugo+rx /Library/Ballerina/bin
+    find dependencies -type d -exec chmod ugo+rx \{\} \;
+    chmod -R ugo+r /Library/Ballerina/lib
+    chmod o-w .
+    rm -f /Library/Ballerina/bin/ballerina
+    rm -f /etc/paths.d/ballerina
+    echo "Set permissions for Ballerina directory"
 fi
 
-echo "Source settings.json found"
-
-# Get all user home directories (excluding system users)
 USER_HOMES=$(dscl . list /Users NFSHomeDirectory | awk '$2 ~ /^\/Users\// {print $2}')
 
-# Copy settings.json to each user's directory
+# set the integrator version as active ballerina version for all users
 for USER_HOME in $USER_HOMES; do
-    # Skip if home directory doesn't exist
     if [ ! -d "$USER_HOME" ]; then
         echo "Skipping non-existent home: $USER_HOME"
         continue
     fi
     
-    # Get the username
     USERNAME=$(basename "$USER_HOME")
     
-    # Skip system users
     if [ "$USERNAME" = "Shared" ] || [ "$USERNAME" = "Guest" ]; then
         echo "Skipping system user: $USERNAME"
         continue
     fi
     
-    USER_SETTINGS_DIR="$USER_HOME/Library/Application Support/WSO2 Integrator/User"
-    USER_SETTINGS_FILE="$USER_SETTINGS_DIR/settings.json"
-    
-    echo "Processing user: $USERNAME"
-    
-    # Create directory if it doesn't exist
-    if [ ! -d "$USER_SETTINGS_DIR" ]; then
-        mkdir -p "$USER_SETTINGS_DIR"
-        echo "Created directory: $USER_SETTINGS_DIR"
-    fi
-    
-    # Copy settings file
-    cp "$SETTINGS_SOURCE" "$USER_SETTINGS_FILE"
-    
-    # Get the user's UID and GID
-    USER_UID=$(id -u "$USERNAME" 2>/dev/null || echo "")
-    USER_GID=$(id -g "$USERNAME" 2>/dev/null || echo "")
-    
-    if [ -n "$USER_UID" ] && [ -n "$USER_GID" ]; then
-        # Set proper ownership
-        chown -R "$USER_UID:$USER_GID" "$USER_HOME/Library/Application Support/WSO2 Integrator"
-        echo "Set ownership for $USERNAME (UID: $USER_UID, GID: $USER_GID)"
-    else
-        echo "WARNING: Could not determine UID/GID for $USERNAME"
-    fi
-    
-    # Set proper permissions
-    chmod 755 "$USER_SETTINGS_DIR"
-    chmod 644 "$USER_SETTINGS_FILE"
-    
-    echo "Successfully copied settings.json to $USER_SETTINGS_FILE"
+    USER_BAL_VERSION_FILE="$USER_HOME/.ballerina/ballerina-version"
+    rm -f "$USER_BAL_VERSION_FILE"
+    echo "Removed ballerina-version file for user: $USERNAME"
 done
-
-# Set proper permissions for system-wide directories
-echo "Setting system-wide permissions"
-
-# Set permissions for /Library/WSO2-Integrator/Ballerina
-if [ -d "/Library/WSO2-Integrator/Ballerina" ]; then
-    chmod -R 755 "/Library/WSO2-Integrator/Ballerina"
-    chown -R root:wheel "/Library/WSO2-Integrator/Ballerina"
-    echo "Set permissions for Ballerina directory"
-fi
-
-# Set permissions for system settings
-if [ -d "/Library/Application Support/WSO2 Integrator" ]; then
-    chmod -R 755 "/Library/Application Support/WSO2 Integrator"
-    chown -R root:wheel "/Library/Application Support/WSO2 Integrator"
-    echo "Set permissions for system settings directory"
-fi
 
 # Set permissions for the .app in /Applications
 if [ -d "/Applications/WSO2 Integrator.app" ]; then
