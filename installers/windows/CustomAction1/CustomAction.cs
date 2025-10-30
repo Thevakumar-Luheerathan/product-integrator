@@ -66,5 +66,60 @@ namespace CustomAction1
 
             return ActionResult.Success;
         }
+
+        [CustomAction]
+        public static ActionResult clearCurrentActiveBallerinaVersion(Session session)
+        {
+            session.Log("Begin clearCurrentActiveBallerinaVersion");
+
+            try
+            {
+                var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_UserProfile WHERE Special = False");
+
+                using (PrincipalContext context = new PrincipalContext(ContextType.Machine))
+                {
+                    foreach (ManagementObject profile in searcher.Get())
+                    {
+                        string localPath = (string)profile["LocalPath"];
+                        if (string.IsNullOrEmpty(localPath)) continue;
+
+                        string username = localPath.Substring(localPath.LastIndexOf('\\') + 1);
+                        var user = UserPrincipal.FindByIdentity(context, username);
+
+                        if (user == null || user.Enabled == false)
+                        {
+                            continue;
+                        }
+
+                        session.Log($"User directory: {localPath}");
+                        string ballerinaUserHome = System.IO.Path.Combine(localPath, ".ballerina");
+                        if (System.IO.Directory.Exists(ballerinaUserHome))
+                        {
+                            session.Log($"Ballerina user home directory found: {ballerinaUserHome}");
+                            string ballerinaVersionFile = System.IO.Path.Combine(ballerinaUserHome, "ballerina-version");
+                            if (System.IO.File.Exists(ballerinaVersionFile))
+                            {
+                                System.IO.File.Delete(ballerinaVersionFile);
+                                session.Log($"Deleted ballerina-version file: {ballerinaVersionFile}");
+                            }
+                            else
+                            {
+                                session.Log($"ballerina-version file not found: {ballerinaVersionFile}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                session.Log($"Error copying settings.json: {ex}");
+                //return ActionResult.Failure;
+            }
+
+            return ActionResult.Success;
+        }
+
+
+
     }
 }
