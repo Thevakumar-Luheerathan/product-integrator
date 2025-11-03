@@ -36,5 +36,5 @@
     <choice id="com.wso2.wso2integrator" visible="false">
         <pkg-ref id="com.wso2.wso2integrator" />
     </choice>
-    <pkg-ref id="com.wso2.wso2integrator" version="1.0.0" onConclusion="none">WSO2 Integrator.pkg</pkg-ref>
+    <pkg-ref id="com.wso2.wso2integrator" version="__VERSION__" onConclusion="none">WSO2 Integrator.pkg</pkg-ref>
 </installer-gui-script>
