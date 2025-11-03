@@ -19,7 +19,7 @@
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
     <MediaTemplate EmbedCab="yes" />
 
-    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <ui:WixUI Id="WixUI_InstallDir_Custom" InstallDirectory="INSTALLFOLDER" />
 
     <!-- <UI>
       <UIRef Id="WixUI_InstallDir" />
@@ -33,8 +33,8 @@
     </UI> -->
 
     <WixVariable Id="WixUILicenseRtf" Value=".\resources\LICENSE.rtf" />
-    <WixVariable Id="WixUIBannerBmp" Value=".\resources\Banner.jpg" />
-    <WixVariable Id="WixUIDialogBmp" Value=".\resources\Dialog.jpg" />
+    <WixVariable Id="WixUIBannerBmp" Value=".\resources\Banner_i.png" />
+    <WixVariable Id="WixUIDialogBmp" Value=".\resources\Dialog_i.png" />
 
     <Feature Id="Main">
       <ComponentGroupRef Id="IntegratorComponents" />
