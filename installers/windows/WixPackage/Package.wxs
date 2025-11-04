@@ -8,10 +8,19 @@
     InstallerVersion="500"
     Compressed="yes"
   >
+    <Property Id="BALLERINA_INSTALLATION_WARNING" Value="0" />
     <Binary Id="ExtActionsDll" SourceFile="..\CustomAction1\bin\Debug\net472\CustomAction1.CA.dll" />
     <CustomAction Id="clearCurrentActiveBallerinaVersionCA" BinaryRef="ExtActionsDll"
       DllEntry="clearCurrentActiveBallerinaVersion" Execute="deferred" Impersonate="no"
       Return="check" />
+    <CustomAction Id="checkBallerinaInstallationCA" BinaryRef="ExtActionsDll"
+      DllEntry="checkBallerinaInstallation" Execute="immediate" Impersonate="no"
+      Return="check" />
+
+    <InstallUISequence>
+      <Custom Action="checkBallerinaInstallationCA" After="CostFinalize" />
+    </InstallUISequence>
+
     <InstallExecuteSequence>
       <Custom Action="clearCurrentActiveBallerinaVersionCA" After="InstallFiles" />
     </InstallExecuteSequence>
@@ -21,17 +30,6 @@
 
     <ui:WixUI Id="WixUI_InstallDir_Custom" InstallDirectory="INSTALLFOLDER" />
 
-    <!-- <UI>
-      <UIRef Id="WixUI_InstallDir" />
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">NOT
-        Installed</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">
-        1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="PrepareDlg" Order="5">
-        WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"
-      </Publish>
-    </UI> -->
-
     <WixVariable Id="WixUILicenseRtf" Value=".\resources\LICENSE.rtf" />
     <WixVariable Id="WixUIBannerBmp" Value=".\resources\Banner_i.png" />
     <WixVariable Id="WixUIDialogBmp" Value=".\resources\Dialog_i.png" />
@@ -39,6 +37,7 @@
     <Feature Id="Main">
       <ComponentGroupRef Id="IntegratorComponents" />
       <ComponentGroupRef Id="BallerinaComponents" />
+      <ComponentGroupRef Id="ICPComponents" />
       <ComponentRef Id="IntegratorShortcutComponent" />
       <ComponentRef Id="BallerinaEnvironmentComponent" />
       <!-- <ComponentGroupRef Id="SettingsComponents" /> -->

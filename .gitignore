@@ -37,3 +37,4 @@ installers/windows/CustomAction1/obj/
 installers/windows/CustomAction1/bin/
 installers/windows/WixPackage/obj/
 installers/windows/WixPackage/bin/
+installers/windows/WixPackage/payload/ICP/

@@ -119,7 +119,53 @@ namespace CustomAction1
             return ActionResult.Success;
         }
 
+        [CustomAction]
+        public static ActionResult checkBallerinaInstallation(Session session)
+        {
+            session.Log("Begin checkBallerinaInstallation");
+            try
+            {
+                bool ballerinaSwanLakeFound = false;
+                using (var softwareKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Software"))
+                {
+                    if (softwareKey != null)
+                    {
+                        string[] subKeyNames = softwareKey.GetSubKeyNames();
+                        foreach (var subKey in subKeyNames)
+                        {
+                            if (subKey.StartsWith("Ballerina", StringComparison.OrdinalIgnoreCase) && subKey.EndsWith("swan-lake", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ballerinaSwanLakeFound = true;
+                                session.Log($"Found Ballerina Swan Lake registry key: {subKey}");
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        session.Log("Could not open HKCU\\Software registry key.");
+                    }
+                }
+                if (ballerinaSwanLakeFound)
+                {
+                    session.Log("Setting BALLERINA_INSTALLATION_WARNING to 1");
+                    session.Log($"BALLERINA_INSTALLATION_WARNING value: {session["BALLERINA_INSTALLATION_WARNING"]}");
+                    session["BALLERINA_INSTALLATION_WARNING"] = "1";
+                    session.Log($"BALLERINA_INSTALLATION_WARNING value: {session["BALLERINA_INSTALLATION_WARNING"]}");
+                }
+                else
+                {
+                    session.Log("No Ballerina Swan Lake registry key found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                session.Log($"Error listing registry keys: {ex}");
+                //return ActionResult.Failure;
+            }
 
+            return ActionResult.Success;
+        }
 
     }
 }
