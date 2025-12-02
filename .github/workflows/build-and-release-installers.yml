@@ -38,6 +38,10 @@ on:
         description: 'Specify Integrator version to use'
         required: true
         type: string
+      commit_id:
+        description: 'Commit SHA to checkout'
+        required: false
+        type: string
 
 jobs:
   compile:
@@ -52,6 +56,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+          ref: ${{ github.event.inputs.commit_id != '' && github.event.inputs.commit_id || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -197,12 +202,13 @@ jobs:
 
       - name: Copy Integrator artifact to build directories
         run: |
-          cp ../artifacts/vscode-linux-x64.tar.gz ./installers/linux-deb/
-          cp ../artifacts/vscode-linux-x64.tar.gz ./installers/linux-rpm/
+          cp ../artifacts/vscode-linux-x64.tar.gz ../../installers/linux-deb/
+          cp ../artifacts/vscode-linux-x64.tar.gz ../../installers/linux-rpm/
 
       - name: Build Linux packages - deb
         run: |
           ROOT_DIR=$(pwd)
+          echo "Root dir: ${ROOT_DIR}"
           BALLERINA_VERSION="${{ github.event.inputs.ballerina_version }}"
           BALLERINA_URL="https://github.com/ballerina-platform/ballerina-distribution/releases/download/v${BALLERINA_VERSION}/ballerina-${BALLERINA_VERSION}-swan-lake-linux.zip"
           ICP_VERSION="${{ github.event.inputs.icp_version }}"
