@@ -103,7 +103,7 @@ sed -i '' "s/version=\"$VERSION\"/version=\"__VERSION__\"/g" "$WORK_DIR/Distribu
 
 
 # Check if the build was successful
-if [ -f "WSO2-Integrator-$VERSION.pkg" ]; then
+if [ -f "wso2-integrator-$VERSION-$ARCH.pkg" ]; then
     print_info "Successfully created: WSO2-Integrator-$VERSION.pkg"
     print_info "Package size: $(du -h "WSO2-Integrator-$VERSION.pkg" | cut -f1)"
 else
