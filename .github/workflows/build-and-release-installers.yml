@@ -42,7 +42,11 @@ on:
         description: 'Commit SHA to checkout'
         required: false
         type: string
-
+        
+permissions:
+  id-token: write
+  contents: write        
+        
 jobs:
   compile:
     name: Compile
