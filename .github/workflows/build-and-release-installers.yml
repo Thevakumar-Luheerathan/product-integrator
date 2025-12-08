@@ -42,7 +42,7 @@ on:
         description: 'Commit SHA to checkout'
         required: false
         type: string
-        
+
 permissions:
   id-token: write
   contents: write        
@@ -272,7 +272,7 @@ jobs:
           openssl dgst -sha256 -out installers/linux-deb/wso2-integrator_${{ github.event.inputs.integrator_version }}_amd64.deb.sha256 installers/linux-deb/wso2-integrator_${{ github.event.inputs.integrator_version }}_amd64.deb
           openssl dgst -sha256 -out installers/linux-rpm/wso2-integrator-${{ github.event.inputs.integrator_version }}-1.x86_64.rpm.sha256 installers/linux-rpm/wso2-integrator-${{ github.event.inputs.integrator_version }}-1.x86_64.rpm
 
-      - name: Upload Signatures and Hashes for deb installers
+      - name: Upload Signatures and Hashes for deb installer
         uses: actions/upload-artifact@v4
         with:
           name: Signatures-and-Hashes-DEB
@@ -282,7 +282,7 @@ jobs:
             installers/linux-deb/*.sha256
           if-no-files-found: error
         
-      - name: Upload Signatures and Hashes for rpm installers
+      - name: Upload Signatures and Hashes for rpm installer
         uses: actions/upload-artifact@v4  
         with:
           name: Signatures-and-Hashes-RPM
@@ -530,7 +530,7 @@ jobs:
           cd ./installers/mac
           wget -O ballerina.zip "$BALLERINA_URL"
           wget -O icp.zip "$ICP_URL"
-          ./build.sh ballerina.zip VSCode-darwin-${{ matrix.arch }}.zip icp.zip $INTEGRATOR_VERSION
+          ./build.sh ballerina.zip VSCode-darwin-${{ matrix.arch }}.zip icp.zip $INTEGRATOR_VERSION ${{ matrix.arch }}
           cd ${ROOT_DIR}
 
       - name: Upload macOS artifacts
@@ -540,6 +540,36 @@ jobs:
           path: |
             installers/mac/*.pkg
           if-no-files-found: error
+      
+      
+      - name: cosign-installer
+        uses: sigstore/cosign-installer@v3.5.0
+      - name: Sign the pkg installer
+        run: |
+          cd ../..
+          cosign sign-blob installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg --output-certificate installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg.pem --output-signature installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg.sig --yes
+
+      - name: Verify signature of the pkg installer
+        run: |
+          cd ../..
+          cosign verify-blob installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg --certificate installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg.pem --signature installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg.sig --certificate-identity=https://github.com/Thevakumar-Luheerathan/product-integrator/.github/workflows/build-and-release-installers.yml@${{ github.ref }} --certificate-oidc-issuer=https://token.actions.githubusercontent.com
+          
+      - name: Generate Hashes for pkg installer
+        run: |
+          cd ../..
+          openssl dgst -sha256 -out installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg.sha256 installers/mac/wso2-integrator-${{ github.event.inputs.integrator_version }}-${{ matrix.arch }}.pkg
+
+      - name: Upload Signatures and Hashes for pkg installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Signatures-and-Hashes-PKG
+          path: |
+            installers/mac/*.pem
+            installers/mac/*.sig
+            installers/mac/*.sha256
+          if-no-files-found: error
+        
+     
 
   build-windows:
     if: ${{ github.event.inputs.build_windows == 'true' }}
@@ -770,3 +800,32 @@ jobs:
           path: |
             installers\windows\WixPackage\bin\x64\Release\en-US\*.msi
           if-no-files-found: error
+      
+      - name: cosign-installer
+        uses: sigstore/cosign-installer@v3.5.0
+      - name: Sign the msi installer
+        run: |
+          cd ../..
+          cosign sign-blob installers\windows\WixPackage\bin\x64\Release\en-US\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi --output-certificate installers\windows\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi.pem --output-signature installers\windows\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi.sig --yes
+      - name: Verify signature of the msi installer
+        run: |
+          cd ../..
+          cosign verify-blob installers\windows\WixPackage\bin\x64\Release\en-US\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi --certificate installers\windows\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi.pem --signature installers\windows\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi.sig --certificate-identity=https://github.com/Thevakumar-Luheerathan/product-integrator/.github/workflows/build-and-release-installers.yml@${{ github.ref }} --certificate-oidc-issuer=https://token.actions.githubusercontent.com
+
+          
+      - name: Generate Hashes for msi installer
+        run: |
+          cd ../..
+          openssl dgst -sha256 -out installers\windows\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi.sha256 installers\windows\WixPackage\bin\x64\Release\en-US\wso2-integrator-${{ github.event.inputs.integrator_version }}.msi 
+
+      - name: Upload Signatures and Hashes for msi installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Signatures-and-Hashes-MSI
+          path: |
+            installers\windows/*.pem
+            installers\windows/*.sig
+            installers\windows/*.sha256
+          if-no-files-found: error
+        
+  

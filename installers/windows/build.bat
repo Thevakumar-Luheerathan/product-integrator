@@ -71,6 +71,16 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Rename MSI output to include version
+set "MSI_ORIG=WixPackage\bin\x64\Release\en-US\WSO2-Integrator.msi"
+set "MSI_NEW=WixPackage\bin\x64\Release\en-US\wso2-integrator-%~4.msi"
+if exist "%MSI_ORIG%" (
+    ren "%MSI_ORIG%" "wso2-integrator-%~4.msi"
+    echo Renamed MSI to %MSI_NEW%
+) else (
+    echo MSI file not found: %MSI_ORIG%
+)
+
 REM Revert version placeholder in Package.wxs
 powershell -Command "(Get-Content '.\WixPackage\Package.wxs') -replace '%~4', '@VERSION@' | Set-Content '.\WixPackage\Package.wxs'"
 REM Remove payload directory after build
