@@ -16,11 +16,13 @@ Index: product-integrator/lib/vscode/package.json
      "update-distro": "node build/npm/update-distro.ts",
      "web": "echo 'npm run web' is replaced by './scripts/code-server' or './scripts/code-web'",
      "compile-cli": "gulp compile-cli",
-@@ -66,7 +66,7 @@
+@@ -65,8 +65,8 @@
+     "minify-vscode-reh-web": "node ./node_modules/gulp/bin/gulp.js minify-vscode-reh-web",
      "hygiene": "node ./node_modules/gulp/bin/gulp.js hygiene",
      "core-ci": "node ./node_modules/gulp/bin/gulp.js core-ci",
-     "core-ci-pr": "node ./node_modules/gulp/bin/gulp.js core-ci-pr",
+-    "core-ci-pr": "node ./node_modules/gulp/bin/gulp.js core-ci-pr",
 -    "extensions-ci": "node ./node_modules/gulp/bin/gulp.js extensions-ci",
++    "core-ci-pr": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js core-ci-pr",
 +    "extensions-ci": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js extensions-ci",
      "extensions-ci-pr": "node ./node_modules/gulp/bin/gulp.js extensions-ci-pr",
      "perf": "node scripts/code-perf.js",
